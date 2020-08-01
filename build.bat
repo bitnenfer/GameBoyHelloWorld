@@ -1,8 +1,8 @@
 @echo off 
 
 echo Assembling...
-tools\rgbds\rgbasm.exe -o main.o main.asm
+tools\rgbds\rgbasm.exe -o main.o -i ./ main.asm
 echo Linking...
-tools\rgbds\rgblink.exe -o hello.gb main.o
+tools\rgbds\rgblink.exe -o hello.gb -m hello.map -n hello.sym main.o
 echo Fixing Checksum...
 tools\rgbds\rgbfix.exe -p0 -v hello.gb

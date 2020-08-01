@@ -1,0 +1,120 @@
+ROM Bank #0 (HOME):
+  SECTION: $0040-$0040 ($0001 bytes) ["Interrupt V-BLANK"]
+  SECTION: $0048-$0048 ($0001 bytes) ["Interrupt LCD STAT"]
+  SECTION: $0050-$0050 ($0001 bytes) ["Interrupt Timer"]
+  SECTION: $0058-$0058 ($0001 bytes) ["Interrupt Serial"]
+  SECTION: $0060-$0060 ($0001 bytes) ["Interrupt Joypad"]
+  SECTION: $0100-$0103 ($0004 bytes) ["Entry Point"]
+  SECTION: $0104-$0133 ($0030 bytes) ["Nintendo Logo"]
+  SECTION: $0134-$013E ($000B bytes) ["Title"]
+  SECTION: $013F-$013F ($0001 bytes) ["Manufacturer Code"]
+  SECTION: $0143-$0143 ($0001 bytes) ["CGB Flag"]
+  SECTION: $0144-$0145 ($0002 bytes) ["New Licensee Code"]
+  SECTION: $0146-$0146 ($0001 bytes) ["SGB Flag"]
+  SECTION: $0147-$0147 ($0001 bytes) ["Cartridge Type"]
+  SECTION: $0148-$0148 ($0001 bytes) ["ROM Size"]
+  SECTION: $0149-$0149 ($0001 bytes) ["Ext RAM Size"]
+  SECTION: $014A-$014A ($0001 bytes) ["Destination Code"]
+  SECTION: $014B-$014B ($0001 bytes) ["Old Licensee Code"]
+  SECTION: $014C-$014C ($0001 bytes) ["Mask ROM Version number"]
+  SECTION: $014D-$014D ($0001 bytes) ["Header Checksum"]
+  SECTION: $014E-$014F ($0002 bytes) ["Global Checksum"]
+  SECTION: $0150-$01E4 ($0095 bytes) ["Hello World Program"]
+           $01DB = start_dma_sr_addr
+           $01E5 = end_dma_sr_addr
+           $01D4 = memcpy
+           $0169 = main.clear_shadow_oam
+           $0188 = main_loop.wait_vblank
+           $01AF = main_loop.test_left
+           $01BA = main_loop.test_up
+           $01C7 = main_loop.test_down
+           $01D2 = main_loop.no_buttons
+           $0188 = main_loop
+           $01D4 = memcpy.copy_loop
+    SLACK: $3F19 bytes
+
+WRAM Bank #0:
+  SECTION: $C000-$C000 ($0001 bytes) ["Vars"]
+    SLACK: $0FFF bytes
+
+WRAM Bank #1:
+  EMPTY
+
+WRAM Bank #2:
+  EMPTY
+
+WRAM Bank #3:
+  EMPTY
+
+WRAM Bank #4:
+  EMPTY
+
+WRAM Bank #5:
+  EMPTY
+
+WRAM Bank #6:
+  EMPTY
+
+WRAM Bank #7:
+  EMPTY
+
+VRAM Bank #0:
+  EMPTY
+
+VRAM Bank #1:
+  EMPTY
+
+OAM:
+  EMPTY
+
+HRAM:
+  EMPTY
+
+SRAM Bank #0:
+  EMPTY
+
+SRAM Bank #1:
+  EMPTY
+
+SRAM Bank #2:
+  EMPTY
+
+SRAM Bank #3:
+  EMPTY
+
+SRAM Bank #4:
+  EMPTY
+
+SRAM Bank #5:
+  EMPTY
+
+SRAM Bank #6:
+  EMPTY
+
+SRAM Bank #7:
+  EMPTY
+
+SRAM Bank #8:
+  EMPTY
+
+SRAM Bank #9:
+  EMPTY
+
+SRAM Bank #10:
+  EMPTY
+
+SRAM Bank #11:
+  EMPTY
+
+SRAM Bank #12:
+  EMPTY
+
+SRAM Bank #13:
+  EMPTY
+
+SRAM Bank #14:
+  EMPTY
+
+SRAM Bank #15:
+  EMPTY
+

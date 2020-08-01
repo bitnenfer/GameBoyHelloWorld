@@ -44,117 +44,104 @@ db $00, $00
 
 section "Hello World Program", ROM0[$0150]
 
+include "registers.asm"
+include "sprites.asm"
+
+dma_transfer equ $FF80
+
 main:
-	ld a, [$FF40]
+	; Turn LCD OFF
+	ld a, [rLCDC]
 	res 7, a
-	ld [$FF40], a
+	res 0, a
+	ld [rLCDC], a
 
-	ld de, letter_h
-	ld hl, $8200
-	ld b, 16
-	call tile_memcpy
+	ld de, start_dma_sr_addr
+	ld hl, $FF80
+	ld b, end_dma_sr_addr-start_dma_sr_addr
+	call memcpy
 
-	ld de, letter_e
-	ld hl, $8210
-	ld b, 16
-	call tile_memcpy
-
-	ld de, letter_l
-	ld hl, $8220
-	ld b, 16
-	call tile_memcpy
-
-	ld de, letter_o
-	ld hl, $8230
-	ld b, 16
-	call tile_memcpy
-
-	ld de, letter_w
-	ld hl, $8240
-	ld b, 16
-	call tile_memcpy
-
-	ld de, letter_r
-	ld hl, $8250
-	ld b, 16
-	call tile_memcpy
-
-	ld de, letter_d
-	ld hl, $8260
-	ld b, 16
-	call tile_memcpy
-
-	ld a, $20 	 	; H
-	ld [$9800], a
-	ld a, $21 		; E
-	ld [$9801], a
-	ld a, $22 		; L
-	ld [$9802], a
-	ld a, $22		; L
-	ld [$9803], a
-	ld a, $23 		; O
-	ld [$9804], a
-
-	ld a, $24 		; W
-	ld [$9806], a
-	ld a, $23 		; O
-	ld [$9807], a
-	ld a, $25 		; R
-	ld [$9808], a
-	ld a, $22 		; L
-	ld [$9809], a
-	ld a, $26 		; D
-	ld [$980A], a
-
-	ld a, 144 / 2
-	ld [$FE00], a
-	ld a, 160 / 2
-	ld [$FE01], a
-	ld a, $19
-	ld [$FE02], a
-
+	; Clear Shadow OAM
 	xor a
-	ld [scroll_x], a
+	ld hl, $C100
+	ld b, $A0
+.clear_shadow_oam:
+	ld [hl+], a
+	dec b
+	jr nz, .clear_shadow_oam
 
-	ld a, [$FF40]
+	; Turn LCD ON & Enable Sprites
+	ld a, [rLCDC]
 	set 7, a
 	set 1, a
-	ld [$FF40], a
+	ld [rLCDC], a
+
+	; Setup sprite
+	ld a, 160/2
+	ld [rSPRITE0_X], a
+	ld a, 144/2
+	ld [rSPRITE0_Y], a
+	ld a, $19
+	ld [rSPRITE0_TILE], a
+	xor a
+	ld [rSPRITE0_ATTRIB], a
+
 
 main_loop:
-	ld a, [scroll_x]
-	ld [$FF43], a
-
-.wait_scroll_limit:
-	ld a, [$FF44]
-	cp 9
-	jr nz, .wait_scroll_limit	
-
-	xor a
-	ld [$FF43], a
-
 .wait_vblank:
-	ld a, [$FF44]
+	ld a, [rLY]
 	cp 144
 	jr nz, .wait_vblank
+	call dma_transfer
 
-	ld a, [$FE00]
-	inc a
-	ld [$FE00], a
-	ld a, [$FE01]
-	inc a
-	ld [$FE01], a
+	; DOWN - START
+	; UP - SELECT
+	; LEFT - B
+	; RIGHT - A
 
-	ld a, [scroll_x]
+	ld a, %00001000
+	ld [$FF00], a
+	ld a, [$FF00]
+	ld a, [$FF00]
+	ld a, [$FF00]
+	ld a, [$FF00]
+	ld a, [$FF00]
+	ld a, [$FF00]
+	ld b, a
+.test_right:
+	bit 0, b
+	jr nz, .test_left
+	ld a, [rSPRITE0_X]
 	inc a
-	ld [scroll_x], a
-
+	ld [rSPRITE0_X], a
+	jr .test_up
+.test_left:
+	bit 1, b
+	jr nz, .test_up
+	ld a, [rSPRITE0_X]
+	dec a
+	ld [rSPRITE0_X], a
+.test_up:
+	bit 2, b
+	jr nz, .test_down
+	ld a, [rSPRITE0_Y]
+	dec a
+	ld [rSPRITE0_Y], a
+	jr .no_buttons
+.test_down:
+	bit 3, b
+	jr nz, .no_buttons
+	ld a, [rSPRITE0_Y]
+	inc a
+	ld [rSPRITE0_Y], a
+.no_buttons:
 	jr main_loop
+
 
 	; DE = Source Address
 	; HL = Destination Address
 	; B = Copy Size
-tile_memcpy:
+memcpy:
 .copy_loop:
 	ld a, [de]
 	ld [hl+], a
@@ -163,131 +150,16 @@ tile_memcpy:
 	jr nz, .copy_loop
 	ret
 
-letter_h:
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01111111
-db %01111111
-db %01111111
-db %01111111
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-
-letter_e:
-db %01111111
-db %01111111
-db %01111111
-db %01111111
-db %01100000
-db %01100000
-db %01111111
-db %01111111
-db %01111111
-db %01111111
-db %01100000
-db %01100000
-db %01111111
-db %01111111
-db %01111111
-db %01111111
-
-letter_l:
-db %01100000
-db %01100000
-db %01100000
-db %01100000
-db %01100000
-db %01100000
-db %01100000
-db %01100000
-db %01100000
-db %01100000
-db %01100000
-db %01100000
-db %01111111
-db %01111111
-db %01111111
-db %01111111
-
-letter_o:
-db %00111110
-db %00111110
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %00111110
-db %00111110
-
-letter_w:
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01101011
-db %01101011
-db %01101011
-db %01101011
-db %01101011
-db %01101011
-db %00111110
-db %00111110
-
-letter_r:
-db %01111111
-db %01111111
-db %01111111
-db %01111111
-db %01100011
-db %01100011
-db %01111100
-db %01111100
-db %01111111
-db %01111111
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-
-letter_d:
-db %01111110
-db %01111110
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01100011
-db %01111110
-db %01111110
+start_dma_sr_addr:
+	ld a, $C1
+	ldh [DMA], a
+	ld a, $28
+wait:
+	dec a
+    db $20
+    db $FD
+    ret
+end_dma_sr_addr:
 
 section "Vars", WRAM0
-scroll_x: ds $01
+tmp: ds $01
